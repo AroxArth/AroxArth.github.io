@@ -6,6 +6,9 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  // User site served at the domain root — no `base` needed.
+  site: 'https://aroxarth.github.io',
+
   integrations: [react()],
 
   vite: {

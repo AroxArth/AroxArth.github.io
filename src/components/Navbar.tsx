@@ -199,7 +199,10 @@ export default function Navbar() {
                 draggable={false}
                 onClick={(e) => e.preventDefault()}
               >
-                {label}
+                <span className="sm:hidden">
+                  <NavIcon id={id} />
+                </span>
+                <span className="hidden sm:inline">{label}</span>
               </a>
             </li>
           ))}
@@ -212,11 +215,77 @@ export default function Navbar() {
         >
           {SECTIONS.map(({ id, label }) => (
             <li key={id}>
-              <span className="nav-link">{label}</span>
+              <span className="nav-link">
+                <span className="sm:hidden">
+                  <NavIcon id={id} />
+                </span>
+                <span className="hidden sm:inline">{label}</span>
+              </span>
             </li>
           ))}
         </ul>
       </div>
     </nav>
   );
+}
+
+function NavIcon({ id }: { id: string }) {
+  const common = {
+    width: 20,
+    height: 20,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.9,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true,
+  };
+  switch (id) {
+    case "hero":
+      return (
+        <svg {...common}>
+          <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
+        </svg>
+      );
+    case "about":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20a8 8 0 0 1 16 0" />
+        </svg>
+      );
+    case "stack":
+      return (
+        <svg {...common}>
+          <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+          <path d="m3 13 9 5 9-5" />
+        </svg>
+      );
+    case "experience":
+      return (
+        <svg {...common}>
+          <rect x="3" y="7" width="18" height="13" rx="2" />
+          <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        </svg>
+      );
+    case "projects":
+      return (
+        <svg {...common}>
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      );
+    case "contact":
+      return (
+        <svg {...common}>
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="m3 7 9 6 9-6" />
+        </svg>
+      );
+    default:
+      return null;
+  }
 }
