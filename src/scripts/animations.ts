@@ -73,6 +73,66 @@ export function initAnimations() {
     const fill = proceso.querySelector<HTMLElement>("[data-proceso-fill]");
     const distance = () => window.innerHeight * phases.length;
 
+    // Frame-sequence video background for this section, scrubbed by the scroll.
+    const canvas = proceso.querySelector<HTMLCanvasElement>("[data-proceso-canvas]");
+    const ctx = canvas?.getContext("2d");
+    if (canvas && ctx) {
+      const FRAME_COUNT = 150;
+      const images: HTMLImageElement[] = [];
+      for (let i = 1; i <= FRAME_COUNT; i++) {
+        const img = new Image();
+        img.src = `/frames/frame-${String(i).padStart(3, "0")}.jpg`;
+        images.push(img);
+      }
+      const frame = { i: 0 };
+
+      const draw = () => {
+        const img = images[Math.round(frame.i)];
+        if (!img || !img.complete || !img.naturalWidth) return;
+        const cw = canvas.width;
+        const ch = canvas.height;
+        const ir = img.naturalWidth / img.naturalHeight;
+        const cr = cw / ch;
+        let dw: number, dh: number, dx: number, dy: number;
+        if (cr > ir) {
+          dw = cw;
+          dh = cw / ir;
+          dx = 0;
+          dy = (ch - dh) / 2;
+        } else {
+          dh = ch;
+          dw = ch * ir;
+          dx = (cw - dw) / 2;
+          dy = 0;
+        }
+        ctx.clearRect(0, 0, cw, ch);
+        ctx.drawImage(img, dx, dy, dw, dh);
+      };
+
+      const resize = () => {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(canvas.clientWidth * dpr);
+        canvas.height = Math.round(canvas.clientHeight * dpr);
+        draw();
+      };
+
+      images[0].addEventListener("load", resize);
+      window.addEventListener("resize", resize);
+      resize();
+
+      gsap.to(frame, {
+        i: FRAME_COUNT - 1,
+        ease: "none",
+        onUpdate: draw,
+        scrollTrigger: {
+          trigger: proceso,
+          start: "top top",
+          end: distance,
+          scrub: true,
+        },
+      });
+    }
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: proceso,
@@ -113,60 +173,47 @@ export function initAnimations() {
     }
   }
 
-  // --- Site-wide video background: image sequence scrubbed by whole-page scroll ---
-  const bgCanvas = document.querySelector<HTMLCanvasElement>("[data-bg-canvas]");
-  const bgCtx = bgCanvas?.getContext("2d");
-  if (bgCanvas && bgCtx) {
-    const FRAME_COUNT = 150;
-    const images: HTMLImageElement[] = [];
-    for (let i = 1; i <= FRAME_COUNT; i++) {
-      const img = new Image();
-      img.src = `/frames/frame-${String(i).padStart(3, "0")}.jpg`;
-      images.push(img);
-    }
-    const frame = { i: 0 };
+  // --- Reusable cinematic sections: pin + cross-fade scenes on scroll ---
+  document.querySelectorAll<HTMLElement>("[data-cinema]").forEach((section) => {
+    const scenes = gsap.utils.toArray<HTMLElement>("[data-scene]", section);
+    if (!scenes.length) return;
+    const fill = section.querySelector<HTMLElement>("[data-cinema-fill]");
+    const dist = () => window.innerHeight * scenes.length;
 
-    const draw = () => {
-      const img = images[Math.round(frame.i)];
-      if (!img || !img.complete || !img.naturalWidth) return;
-      const cw = bgCanvas.width;
-      const ch = bgCanvas.height;
-      const ir = img.naturalWidth / img.naturalHeight;
-      const cr = cw / ch;
-      let dw: number, dh: number, dx: number, dy: number;
-      if (cr > ir) {
-        dw = cw;
-        dh = cw / ir;
-        dx = 0;
-        dy = (ch - dh) / 2;
-      } else {
-        dh = ch;
-        dw = ch * ir;
-        dx = (cw - dw) / 2;
-        dy = 0;
-      }
-      bgCtx.clearRect(0, 0, cw, ch);
-      bgCtx.drawImage(img, dx, dy, dw, dh);
-    };
-
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      bgCanvas.width = Math.round(bgCanvas.clientWidth * dpr);
-      bgCanvas.height = Math.round(bgCanvas.clientHeight * dpr);
-      draw();
-    };
-
-    images[0].addEventListener("load", resize);
-    window.addEventListener("resize", resize);
-    resize();
-
-    gsap.to(frame, {
-      i: FRAME_COUNT - 1,
-      ease: "none",
-      onUpdate: draw,
-      scrollTrigger: { start: 0, end: "max", scrub: 0.5 },
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: dist,
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1,
+      },
     });
-  }
+
+    scenes.forEach((el, i) => {
+      tl.fromTo(
+        el,
+        { opacity: 0, scale: 0.9, y: 40 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.6 },
+      );
+      if (i < scenes.length - 1) {
+        tl.to(el, { opacity: 0, scale: 1.06, y: -40, duration: 0.6 }, "+=0.5");
+      }
+    });
+
+    if (fill) {
+      gsap.fromTo(
+        fill,
+        { scaleX: 0 },
+        {
+          scaleX: 1,
+          ease: "none",
+          scrollTrigger: { trigger: section, start: "top top", end: dist, scrub: true },
+        },
+      );
+    }
+  });
 
   window.addEventListener("load", () => ScrollTrigger.refresh());
 }
