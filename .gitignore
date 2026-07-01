@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # gentle ai tooling
 .atl/
+
+# ai agent instruction files (kept locally, not in the repo)
+AGENTS.md
+CLAUDE.md

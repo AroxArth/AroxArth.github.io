@@ -24,17 +24,15 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
 
-    {/* No-flash theme init: dark is the default; opt into the B&W light theme
-        only when the user has explicitly chosen it. Runs before first paint. */}
+    {/* No-flash theme init: LIGHT (B&W) is the default; opt into dark only when
+        the visitor has explicitly chosen it. Runs before first paint. */}
     <script is:inline>
       (function () {
         try {
-          if (localStorage.getItem("theme") !== "light") {
+          if (localStorage.getItem("theme") === "dark") {
             document.documentElement.classList.add("dark");
           }
-        } catch (_) {
-          document.documentElement.classList.add("dark");
-        }
+        } catch (_) {}
       })();
     </script>
 
