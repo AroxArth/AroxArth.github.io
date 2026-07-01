@@ -1,0 +1,42 @@
+---
+/**
+ * Reusable liquid-glass button. Renders as an <a> when `href` is provided,
+ * otherwise as a <button>. Every clickable surface in the site uses this so
+ * the glass look and press animation stay consistent.
+ */
+interface Props {
+  href?: string;
+  variant?: "default" | "accent";
+  target?: string;
+  rel?: string;
+  class?: string;
+}
+
+const {
+  href,
+  variant = "default",
+  target,
+  rel,
+  class: className = "",
+} = Astro.props;
+
+const classes = [
+  "glass-btn",
+  variant === "accent" ? "glass-btn--accent" : "",
+  className,
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+{
+  href ? (
+    <a href={href} target={target} rel={rel} class={classes} data-liquid-glass>
+      <slot />
+    </a>
+  ) : (
+    <button type="button" class={classes} data-liquid-glass>
+      <slot />
+    </button>
+  )
+}

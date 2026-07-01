@@ -1,0 +1,549 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: styles apply under `.dark` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ */
+/*  Design tokens                                                      */
+/* ------------------------------------------------------------------ */
+
+/* Static design-time tokens (fonts, radii, easing). */
+@theme {
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-glass: 1rem;
+
+  /* Springy easing that makes glass surfaces feel liquid on press. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Semantic runtime tokens — these swap between light and dark. */
+:root {
+  --canvas: #f4f4f7;
+  --surface: #ffffff;
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --accent: #4f46e5;
+  --accent-ink: #ffffff;
+
+  /* Liquid glass layers (light). */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.38);
+  --glass-highlight: rgba(255, 255, 255, 0.55);
+  --glass-shadow: rgba(17, 17, 26, 0.14);
+}
+
+.dark {
+  --canvas: #08080b;
+  --surface: #111114;
+  --ink: #f5f5f7;
+  --muted: #a1a1aa;
+  --accent: #818cf8;
+  --accent-ink: #0b0b10;
+
+  /* Liquid glass layers (dark). */
+  --glass-bg: rgba(28, 28, 36, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --glass-shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* Expose semantic tokens as Tailwind color utilities (bg-canvas, text-ink...). */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Smooth transition when the theme flips. */
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Liquid glass                                                       */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  /* Reusable frosted-glass surface (cards, modals, navbars). */
+  .glass {
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-glass);
+    box-shadow:
+      0 8px 32px var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Interactive liquid-glass button — grows with a springy pop on press. */
+  .glass-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    font-weight: 500;
+    color: var(--ink);
+    cursor: pointer;
+    isolation: isolate;
+
+    /* Clear glass: no fill. The JS engine sets backdrop-filter to the SVG
+       displacement (real refraction) — a subtle blur is only the pre-JS/
+       non-Chromium fallback. The rim highlight + shadow give it body. */
+    background: transparent;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    box-shadow:
+      0 6px 20px var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+
+    transition:
+      transform 0.28s var(--ease-spring),
+      box-shadow 0.28s ease,
+      background 0.28s ease;
+
+    /* Keep the button permanently on its own compositor layer. Without this,
+       Chrome promotes/demotes it around the hover transform and flips the text
+       anti-aliasing mode, making the font look like it loses weight for a beat. */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Moving specular sheen across the top edge. */
+  .glass-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(
+      130deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0) 45%
+    );
+    opacity: 0.35;
+    transition: opacity 0.28s ease;
+  }
+
+  .glass-btn:hover {
+    transform: translateZ(0) scale(1.06);
+    box-shadow:
+      0 14px 34px var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight);
+  }
+
+  .glass-btn:hover::before {
+    opacity: 0.7;
+  }
+
+  /* Press: the surface inflates with an elastic pop — the "liquid" feel.
+     The spring easing on release makes it bounce back like a gel. */
+  .glass-btn:active {
+    transform: translateZ(0) scale(1.14);
+    transition-duration: 0.18s;
+  }
+
+  .glass-btn:active::before {
+    opacity: 1;
+  }
+
+  .glass-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Accent-filled variant for primary calls to action. */
+  .glass-btn--accent {
+    background: color-mix(in srgb, var(--accent) 82%, transparent);
+    color: var(--accent-ink);
+    border-color: color-mix(in srgb, var(--accent) 40%, white);
+  }
+
+  .glass-btn--accent:hover {
+    background: color-mix(in srgb, var(--accent) 92%, transparent);
+  }
+
+  /* Frosted card surface for sections and project tiles. */
+  .glass-card {
+    position: relative;
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.25rem;
+    box-shadow:
+      0 10px 40px var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Project tiles lift on hover for a tactile, worked-on feel. */
+  .project-card {
+    transition:
+      transform 0.32s var(--ease-spring),
+      box-shadow 0.32s ease,
+      border-color 0.32s ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-6px);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow:
+      0 22px 60px var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Stack tile: centered logo + label, lifts on hover. */
+  .tech-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    transition:
+      transform 0.3s var(--ease-spring),
+      border-color 0.3s ease;
+  }
+
+  .tech-tile:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  /* Small pill label for tech / skill tags. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--ink);
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  /* Sliding "water drop" highlight behind the active navbar item. The spring
+     easing on both transform and width makes it stretch as it travels. */
+  .nav-pill {
+    position: absolute;
+    top: 0.35rem;
+    bottom: 0.35rem;
+    left: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+    box-shadow: inset 0 1px 0 var(--glass-highlight);
+    transition:
+      transform 0.45s var(--ease-spring),
+      width 0.45s var(--ease-spring);
+    will-change: transform, width;
+    pointer-events: none;
+  }
+
+  .nav-link {
+    position: relative;
+    z-index: 1;
+    display: block;
+    padding: 0.8rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 999px;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: color 0.25s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--ink);
+  }
+
+  .nav-link[data-active="true"] {
+    color: var(--ink);
+  }
+}
+
+@layer base {
+  /* Anchor targets clear the fixed navbar when jumping via nav links. */
+  :where(section[id]) {
+    scroll-margin-top: 7rem;
+  }
+
+  /* Scroll-reveal initial state — GSAP eases these to their natural position.
+     Revealed instantly for reduced-motion users (and no-JS via Layout). */
+  [data-hero],
+  [data-animate],
+  [data-animate-group] > * {
+    opacity: 0;
+    transform: translateY(40px);
+    will-change: opacity, transform;
+  }
+
+  /* Lenis smooth-scroll wiring. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+}
+
+/* Modal entrance. */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes backdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Ambient background: aurora + grain                                 */
+/* ------------------------------------------------------------------ */
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -50;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora__blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+  animation: auroraFloat 22s ease-in-out infinite;
+}
+
+.dark .aurora__blob {
+  opacity: 0.28;
+  filter: blur(110px);
+}
+
+.aurora__blob--1 {
+  width: 46vw;
+  height: 46vw;
+  top: -12%;
+  left: -6%;
+  background: radial-gradient(circle, var(--accent), transparent 68%);
+}
+
+.aurora__blob--2 {
+  width: 42vw;
+  height: 42vw;
+  top: 28%;
+  right: -12%;
+  background: radial-gradient(circle, #e879f9, transparent 68%);
+  animation-delay: -7s;
+}
+
+.aurora__blob--3 {
+  width: 40vw;
+  height: 40vw;
+  bottom: -18%;
+  left: 22%;
+  background: radial-gradient(circle, #22d3ee, transparent 68%);
+  animation-delay: -14s;
+}
+
+@keyframes auroraFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(4%, 6%) scale(1.08);
+  }
+  66% {
+    transform: translate(-4%, -3%) scale(0.96);
+  }
+}
+
+/* Fine film grain for depth. */
+.aurora__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Thin scroll-progress bar (CSS scroll-driven; Chromium). */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  z-index: 60;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 40%, #e879f9)
+  );
+  animation: scrollGrow linear both;
+  animation-timeline: scroll(root);
+}
+
+@keyframes scrollGrow {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Section index label (01 · Sobre mí). */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.eyebrow::before {
+  content: attr(data-index);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Pinned scroll-scrubbed "process" sequence                          */
+/* ------------------------------------------------------------------ */
+
+.proceso-sticky {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.proceso-stage {
+  position: relative;
+  width: 100%;
+  max-width: 44rem;
+  height: 16rem;
+}
+
+.proceso-phase {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0;
+}
+
+.proceso-num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3em;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.proceso-label {
+  font-size: clamp(2.75rem, 9vw, 5.5rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.proceso-desc {
+  max-width: 32rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.proceso-track {
+  width: min(90%, 30rem);
+  height: 3px;
+  border-radius: 999px;
+  background: var(--glass-border);
+  overflow: hidden;
+}
+
+.proceso-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--accent), #e879f9);
+  border-radius: inherit;
+}
+
+/* Respect users who prefer less motion: drop the springy overshoot and long
+   scroll animation, but keep a small, non-vestibular press feedback so the
+   button still clearly reacts. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .glass-btn {
+    transition: transform 0.12s ease;
+  }
+  .glass-btn:hover {
+    transform: translateZ(0) scale(1.03);
+  }
+  .glass-btn:active {
+    transform: translateZ(0) scale(1.08);
+  }
+}

@@ -1,0 +1,28 @@
+---
+import GlassButton from "../GlassButton.astro";
+---
+
+<section id="contact" class="mx-auto max-w-3xl px-6 py-28 text-center">
+  <p data-animate class="eyebrow justify-center" data-index="05">Contacto</p>
+  <h2 data-animate class="mt-3 text-3xl font-semibold tracking-tight sm:text-5xl">
+    Construyamos algo
+  </h2>
+  <p data-animate class="mx-auto mt-4 max-w-xl text-lg text-muted">
+    ¿Tienes un proyecto o una oportunidad? Escríbeme y conversamos.
+  </p>
+
+  <div data-animate class="mt-10 flex flex-wrap items-center justify-center gap-4">
+    <GlassButton href="mailto:aroxayasta@gmail.com">Correo</GlassButton>
+    <GlassButton
+      href="https://github.com/AroxArth"
+      target="_blank"
+      rel="noopener noreferrer">GitHub</GlassButton
+    >
+    {/* Social links shown but intentionally not linked yet. */}
+    <GlassButton href="#">LinkedIn</GlassButton>
+  </div>
+
+  <p class="mt-16 text-sm text-muted">
+    © 2026 Jairo Aron Huamán Ayasta · Hecho con Astro y liquid glass.
+  </p>
+</section>

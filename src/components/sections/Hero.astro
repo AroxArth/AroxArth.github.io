@@ -1,0 +1,50 @@
+---
+import GlassButton from "../GlassButton.astro";
+---
+
+<section
+  id="hero"
+  class="relative flex min-h-screen items-center justify-center overflow-hidden px-6"
+>
+  <div class="max-w-3xl text-center">
+    <p data-hero class="text-sm font-medium uppercase tracking-[0.3em] text-muted">
+      Portafolio
+    </p>
+
+    <h1 data-hero class="mt-5 text-4xl font-semibold tracking-tight sm:text-6xl">
+      Jairo Aron Huamán Ayasta
+    </h1>
+
+    <p data-hero class="mx-auto mt-6 max-w-2xl text-xl text-ink sm:text-2xl">
+      Arquitecto de software <span class="text-accent">AI-Driven</span> y
+      desarrollador Full-Stack.
+    </p>
+    <p data-hero class="mx-auto mt-2 max-w-xl text-base text-muted">
+      Construyo soluciones modernas, óptimas y funcionales.
+    </p>
+
+    <p data-hero class="mt-6 text-sm font-medium tracking-wide text-muted">
+      Junior · Egresado 2025 · Perú
+    </p>
+
+    <div data-hero class="mt-10 flex flex-wrap items-center justify-center gap-4">
+      <GlassButton href="#contact">Contacto</GlassButton>
+      <GlassButton
+        href="https://github.com/AroxArth"
+        target="_blank"
+        rel="noopener noreferrer">GitHub</GlassButton
+      >
+    </div>
+  </div>
+
+  {/* Scroll cue */}
+  <a
+    href="#about"
+    class="group absolute bottom-8 left-1/2 -translate-x-1/2 text-muted"
+    aria-label="Bajar"
+  >
+    <span class="flex h-10 w-6 items-start justify-center rounded-full border border-current p-1.5">
+      <span class="h-2 w-1 animate-bounce rounded-full bg-current"></span>
+    </span>
+  </a>
+</section>

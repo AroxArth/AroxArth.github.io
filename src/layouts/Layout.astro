@@ -1,0 +1,55 @@
+---
+import "@fontsource-variable/inter";
+import "devicon/devicon.min.css";
+import "../styles/global.css";
+import AuroraBackground from "../components/AuroraBackground.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Jairo Aron Huamán Ayasta — AI-Driven Software Architect & Full-Stack Developer",
+  description = "Portafolio de Jairo Aron Huamán Ayasta: arquitecto de software AI-Driven y desarrollador Full-Stack. Sistemas de pensiones, aplicaciones de escritorio y plataformas web.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+
+    {/* Dark is the default theme. The ThemeToggle component is kept in the
+        codebase (unused) in case a light/dark switch is wanted again. */}
+
+    {/* If JS is disabled, reveal everything the scroll animations would hide. */}
+    <noscript>
+      <style>
+        [data-hero],
+        [data-animate],
+        [data-animate-group] > * {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <div class="scroll-progress"></div>
+    <AuroraBackground />
+    <slot />
+
+    <script>
+      import { initLiquidGlass } from "../scripts/initLiquidGlass";
+      import { initAnimations } from "../scripts/animations";
+      // Run once the layout is parsed; islands mount their own glass after.
+      initLiquidGlass();
+      initAnimations();
+    </script>
+  </body>
+</html>

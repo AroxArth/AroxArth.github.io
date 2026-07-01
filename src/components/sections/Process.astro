@@ -1,0 +1,33 @@
+---
+// Pinned, scroll-scrubbed sequence: scrolling plays through the phases
+// frame-by-frame (GSAP scrub) — a cinematic "how I work" moment.
+const phases = [
+  { n: "01", label: "Explorar", desc: "Entiendo el problema y el terreno antes de tocar una línea de código." },
+  { n: "02", label: "Especificar", desc: "Defino requisitos y contratos claros. Sin ambigüedad." },
+  { n: "03", label: "Diseñar", desc: "Elijo la arquitectura: limpia, hexagonal, mantenible." },
+  { n: "04", label: "Construir", desc: "Dirijo a la IA para implementar, con TDD como red de seguridad." },
+  { n: "05", label: "Verificar", desc: "Valido contra la especificación. Nada se da por hecho." },
+];
+---
+
+<section id="proceso" data-proceso class="relative">
+  <div class="proceso-sticky">
+    <p class="eyebrow" data-index="◆">Cómo trabajo</p>
+
+    <div class="proceso-stage">
+      {
+        phases.map((p) => (
+          <div class="proceso-phase" data-phase>
+            <span class="proceso-num">{p.n}</span>
+            <h3 class="proceso-label">{p.label}</h3>
+            <p class="proceso-desc">{p.desc}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="proceso-track">
+      <span class="proceso-fill" data-proceso-fill></span>
+    </div>
+  </div>
+</section>
