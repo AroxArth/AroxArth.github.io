@@ -18,31 +18,41 @@
 }
 
 /* Semantic runtime tokens — these swap between light and dark. */
+
+/* LIGHT = pure black & white (no colour). */
 :root {
-  --canvas: #f4f4f7;
+  --canvas: #ffffff;
   --surface: #ffffff;
-  --ink: #1d1d1f;
-  --muted: #6e6e73;
-  --accent: #4f46e5;
+  --ink: #0a0a0a;
+  --muted: #5f5f5f;
+  --accent: #111111;
+  --accent-2: #444444;
   --accent-ink: #ffffff;
 
   /* Liquid glass layers (light). */
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.38);
-  --glass-highlight: rgba(255, 255, 255, 0.55);
-  --glass-shadow: rgba(17, 17, 26, 0.14);
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(0, 0, 0, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.85);
+  --glass-shadow: rgba(0, 0, 0, 0.12);
 }
 
+/* DARK = Amber / Gold palette. */
 .dark {
-  --canvas: #08080b;
-  --surface: #111114;
-  --ink: #f5f5f7;
-  --muted: #a1a1aa;
-  --accent: #818cf8;
-  --accent-ink: #0b0b10;
+  --canvas: #0a0a0c;
+  --surface: #151312;
+  --ink: #f5f4f0;
+  --muted: #a3a099;
+  --accent: #fbbf24;
+  --accent-2: #fb923c;
+  --accent-ink: #1a1400;
+
+  /* Aurora blob colours (dark only; greyscaled in light). */
+  --aurora-1: #fbbf24;
+  --aurora-2: #fb923c;
+  --aurora-3: #fcd34d;
 
   /* Liquid glass layers (dark). */
-  --glass-bg: rgba(28, 28, 36, 0.45);
+  --glass-bg: rgba(32, 28, 22, 0.45);
   --glass-border: rgba(255, 255, 255, 0.14);
   --glass-highlight: rgba(255, 255, 255, 0.22);
   --glass-shadow: rgba(0, 0, 0, 0.5);
@@ -266,17 +276,30 @@
     white-space: nowrap;
   }
 
+  /* The whole bar grows a touch while pressed (set inline in Navbar). */
+  .nav-bar {
+    transition: transform 0.28s var(--ease-spring);
+    cursor: grab;
+  }
+  .nav-bar:active {
+    cursor: grabbing;
+  }
+
   /* Sliding "water drop" highlight behind the active navbar item. The spring
-     easing on both transform and width makes it stretch as it travels. */
+     easing on both transform and width makes it stretch as it travels — and
+     the trailing lag while dragging gives it that liquid feel. */
   .nav-pill {
     position: absolute;
     top: 0.35rem;
     bottom: 0.35rem;
     left: 0;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
-    border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
-    box-shadow: inset 0 1px 0 var(--glass-highlight);
+    /* Neutral glass chip — the ACTIVE LABEL carries the accent colour, not the pill. */
+    background: color-mix(in srgb, var(--ink) 12%, transparent);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      0 2px 12px var(--glass-shadow);
     transition:
       transform 0.45s var(--ease-spring),
       width 0.45s var(--ease-spring);
@@ -295,14 +318,27 @@
     color: var(--muted);
     white-space: nowrap;
     transition: color 0.25s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+    /* Keep labels crisp and immune to the glass blur / press-scaling. */
+    -webkit-font-smoothing: antialiased;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .nav-link:hover {
     color: var(--ink);
   }
 
-  .nav-link[data-active="true"] {
-    color: var(--ink);
+  /* Accent overlay: identical labels, coloured, revealed only inside the pill
+     via clip-path — so text under the glass is "painted" the accent colour.
+     Sits above the base labels (which carry z-index: 1). */
+  .nav-accent {
+    z-index: 2;
+  }
+
+  .nav-accent .nav-link {
+    color: var(--accent);
   }
 }
 
@@ -319,6 +355,11 @@
   [data-animate-group] > * {
     opacity: 0;
     transform: translateY(40px);
+    will-change: opacity, transform;
+  }
+
+  [data-zig] {
+    opacity: 0;
     will-change: opacity, transform;
   }
 
@@ -386,7 +427,7 @@
   height: 46vw;
   top: -12%;
   left: -6%;
-  background: radial-gradient(circle, var(--accent), transparent 68%);
+  background: radial-gradient(circle, var(--aurora-1, #cfcfcf), transparent 68%);
 }
 
 .aurora__blob--2 {
@@ -394,7 +435,7 @@
   height: 42vw;
   top: 28%;
   right: -12%;
-  background: radial-gradient(circle, #e879f9, transparent 68%);
+  background: radial-gradient(circle, var(--aurora-2, #bcbcbc), transparent 68%);
   animation-delay: -7s;
 }
 
@@ -403,8 +444,13 @@
   height: 40vw;
   bottom: -18%;
   left: 22%;
-  background: radial-gradient(circle, #22d3ee, transparent 68%);
+  background: radial-gradient(circle, var(--aurora-3, #dedede), transparent 68%);
   animation-delay: -14s;
+}
+
+/* Light mode keeps the aurora as a whisper of grey. */
+html:not(.dark) .aurora__blob {
+  opacity: 0.16;
 }
 
 @keyframes auroraFloat {
@@ -463,11 +509,7 @@
   z-index: 60;
   transform: scaleX(0);
   transform-origin: 0 50%;
-  background: linear-gradient(
-    90deg,
-    var(--accent),
-    color-mix(in srgb, var(--accent) 40%, #e879f9)
-  );
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
   animation: scrollGrow linear both;
   animation-timeline: scroll(root);
 }
@@ -516,23 +558,83 @@
   z-index: 0;
   width: 100%;
   height: 100%;
+  opacity: 0; /* fades in on scroll; aurora shows through by default */
+  /* Dark mode: tint the smoke gold/amber to match the accent. */
+  filter: grayscale(1) sepia(1) hue-rotate(-6deg) saturate(4.5) brightness(1.35);
 }
 
-/* Darkens the video for readability; a touch of accent ties it to the aurora. */
+/* Light mode: hide the video entirely — cleaner, just the phases on white. */
+html:not(.dark) .proceso-canvas,
+html:not(.dark) .proceso-overlay {
+  display: none;
+}
+
+/* Light mode: solid panels (frosted glass washes out on white). Buttons keep
+   their liquid glass; only the containers become clean solid cards. */
+html:not(.dark) .glass-card {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+}
+
+html:not(.dark) .chip {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.14);
+}
+
+html:not(.dark) .tech-tile {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Light mode: the active-nav pill is a clean white chip, not a grey blob. */
+html:not(.dark) .nav-pill {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+}
+
+/* Mobile: navbar docked to the bottom, tighter so all six items fit. */
+@media (max-width: 640px) {
+  .nav-bar {
+    max-width: 96vw;
+  }
+  .nav-link {
+    padding: 0.55rem 0.55rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* Light mode: clear, lively hover shadow on cards & tiles. */
+html:not(.dark) .tech-tile:hover,
+html:not(.dark) .project-card:hover {
+  transform: translateY(-6px);
+  border-color: color-mix(in srgb, var(--accent) 30%, rgba(0, 0, 0, 0.2));
+  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.16);
+}
+
+/* Darkens the video for readability, but fades to transparent at the top and
+   bottom edges so the section blends seamlessly into the global aurora. */
 .proceso-overlay {
   position: absolute;
   inset: 0;
   z-index: 1;
   background:
     radial-gradient(
-      70% 60% at 50% 50%,
-      color-mix(in srgb, var(--accent) 12%, transparent),
-      transparent 70%
+      75% 60% at 50% 50%,
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      transparent 72%
     ),
     linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--canvas) 68%, transparent),
-      color-mix(in srgb, var(--canvas) 52%, transparent)
+      transparent 0%,
+      color-mix(in srgb, var(--canvas) 55%, transparent) 22%,
+      color-mix(in srgb, var(--canvas) 55%, transparent) 78%,
+      transparent 100%
     );
 }
 
@@ -602,7 +704,7 @@
   width: 100%;
   transform: scaleX(0);
   transform-origin: left;
-  background: linear-gradient(90deg, var(--accent), #e879f9);
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
   border-radius: inherit;
 }
 
@@ -611,7 +713,9 @@
 /* ------------------------------------------------------------------ */
 
 .cinema-sticky {
+  position: relative;
   min-height: 100vh;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;

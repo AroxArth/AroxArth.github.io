@@ -2,28 +2,23 @@
 import GlassButton from "../GlassButton.astro";
 ---
 
-<section id="contact" data-cinema class="relative">
-  <div class="cinema-sticky">
-    <div class="cinema-stage">
-      <div class="cinema-scene" data-scene>
-        <p class="eyebrow" data-index="05">Contacto</p>
-        <h2 class="text-4xl font-semibold tracking-tight sm:text-6xl">
-          Construyamos algo
-        </h2>
-        <p class="max-w-xl text-lg text-muted">
-          ¿Tienes un proyecto o una oportunidad? Escríbeme y conversamos.
-        </p>
-        <div class="flex flex-wrap items-center justify-center gap-4">
-          <GlassButton href="mailto:aroxayasta@gmail.com">Correo</GlassButton>
-          <GlassButton
-            href="https://github.com/AroxArth"
-            target="_blank"
-            rel="noopener noreferrer">GitHub</GlassButton
-          >
-          <GlassButton href="#">LinkedIn</GlassButton>
-        </div>
-      </div>
-    </div>
+<section id="contact" class="mx-auto max-w-3xl px-6 py-32 text-center">
+  <p data-animate class="eyebrow" data-index="05">Contacto</p>
+  <h2 data-animate class="mt-3 text-4xl font-semibold tracking-tight sm:text-6xl">
+    Construyamos algo
+  </h2>
+  <p data-animate class="mx-auto mt-4 max-w-xl text-lg text-muted">
+    ¿Tienes un proyecto o una oportunidad? Escríbeme y conversamos.
+  </p>
+
+  <div data-animate class="mt-10 flex flex-wrap items-center justify-center gap-4">
+    <GlassButton href="mailto:aroxayasta@gmail.com">Correo</GlassButton>
+    <GlassButton
+      href="https://github.com/AroxArth"
+      target="_blank"
+      rel="noopener noreferrer">GitHub</GlassButton
+    >
+    <GlassButton href="#">LinkedIn</GlassButton>
   </div>
 </section>
 

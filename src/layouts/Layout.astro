@@ -16,7 +16,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="es" class="dark">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -24,15 +24,27 @@ const {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
 
-    {/* Dark is the default theme. The ThemeToggle component is kept in the
-        codebase (unused) in case a light/dark switch is wanted again. */}
+    {/* No-flash theme init: dark is the default; opt into the B&W light theme
+        only when the user has explicitly chosen it. Runs before first paint. */}
+    <script is:inline>
+      (function () {
+        try {
+          if (localStorage.getItem("theme") !== "light") {
+            document.documentElement.classList.add("dark");
+          }
+        } catch (_) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
 
     {/* If JS is disabled, reveal everything the scroll animations would hide. */}
     <noscript>
       <style>
         [data-hero],
         [data-animate],
-        [data-animate-group] > * {
+        [data-animate-group] > *,
+        [data-zig] {
           opacity: 1 !important;
           transform: none !important;
         }

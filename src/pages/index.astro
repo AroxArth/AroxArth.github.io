@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.tsx";
+import ThemeToggle from "../components/ThemeToggle.tsx";
 import Hero from "../components/sections/Hero.astro";
 import About from "../components/sections/About.astro";
 import Process from "../components/sections/Process.astro";
@@ -12,6 +13,11 @@ import Contact from "../components/sections/Contact.astro";
 
 <Layout>
   <Navbar client:load />
+
+  {/* Floating light/dark switch, docked to the right edge. */}
+  <div class="fixed right-5 top-5 z-50">
+    <ThemeToggle client:load />
+  </div>
 
   <main>
     <Hero />
