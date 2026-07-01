@@ -113,5 +113,60 @@ export function initAnimations() {
     }
   }
 
+  // --- Site-wide video background: image sequence scrubbed by whole-page scroll ---
+  const bgCanvas = document.querySelector<HTMLCanvasElement>("[data-bg-canvas]");
+  const bgCtx = bgCanvas?.getContext("2d");
+  if (bgCanvas && bgCtx) {
+    const FRAME_COUNT = 150;
+    const images: HTMLImageElement[] = [];
+    for (let i = 1; i <= FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = `/frames/frame-${String(i).padStart(3, "0")}.jpg`;
+      images.push(img);
+    }
+    const frame = { i: 0 };
+
+    const draw = () => {
+      const img = images[Math.round(frame.i)];
+      if (!img || !img.complete || !img.naturalWidth) return;
+      const cw = bgCanvas.width;
+      const ch = bgCanvas.height;
+      const ir = img.naturalWidth / img.naturalHeight;
+      const cr = cw / ch;
+      let dw: number, dh: number, dx: number, dy: number;
+      if (cr > ir) {
+        dw = cw;
+        dh = cw / ir;
+        dx = 0;
+        dy = (ch - dh) / 2;
+      } else {
+        dh = ch;
+        dw = ch * ir;
+        dx = (cw - dw) / 2;
+        dy = 0;
+      }
+      bgCtx.clearRect(0, 0, cw, ch);
+      bgCtx.drawImage(img, dx, dy, dw, dh);
+    };
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      bgCanvas.width = Math.round(bgCanvas.clientWidth * dpr);
+      bgCanvas.height = Math.round(bgCanvas.clientHeight * dpr);
+      draw();
+    };
+
+    images[0].addEventListener("load", resize);
+    window.addEventListener("resize", resize);
+    resize();
+
+    gsap.to(frame, {
+      i: FRAME_COUNT - 1,
+      ease: "none",
+      onUpdate: draw,
+      scrollTrigger: { start: 0, end: "max", scrub: 0.5 },
+    });
+  }
+
   window.addEventListener("load", () => ScrollTrigger.refresh());
 }

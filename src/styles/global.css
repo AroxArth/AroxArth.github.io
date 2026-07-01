@@ -414,6 +414,30 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Site-wide video background (image sequence on a fixed canvas). */
+.video-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -50;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--canvas);
+}
+
+.video-bg__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scrim over the video so foreground text stays readable. */
+.video-bg__scrim {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--canvas) 66%, transparent);
+}
+
 /* Thin scroll-progress bar (CSS scroll-driven; Chromium). */
 .scroll-progress {
   position: fixed;
